@@ -11,6 +11,11 @@ package com.mycompany.taskmanagerfx;
 public class TaskManagerFX {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        System.out.println("Welcome");
+        int a;
+        int b=4;
+        int c=9;
+        a=b+c;
+        System.out.println(+a);
     }
 }
