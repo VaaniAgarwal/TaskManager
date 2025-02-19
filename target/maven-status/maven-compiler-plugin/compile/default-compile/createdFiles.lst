@@ -1,1 +1,4 @@
 com\mycompany\taskmanagerfx\TaskManagerFX.class
+com\mycompany\taskmanagerfx\controller\TaskController.class
+com\mycompany\taskmanagerfx\dao\TaskDAO.class
+com\mycompany\taskmanagerfx\pojo\Task.class
