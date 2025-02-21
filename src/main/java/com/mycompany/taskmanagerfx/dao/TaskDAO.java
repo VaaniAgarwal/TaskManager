@@ -61,6 +61,23 @@ public class TaskDAO {
         }
     }
     
+    public void updateTasks(String id, String newname)
+    {
+        try{
+            pstmt=con.prepareStatement("Update tasks set taskname = ? where taskid = ?");
+            pstmt.setString(1, newname);
+            pstmt.setString(2, id);
+            int rowsupdated = pstmt.executeUpdate();
+            if(rowsupdated > 0)
+            {
+                System.out.println("Task Updated: "+id);
+            }
+        }
+        catch(SQLException ex){
+            
+        }
+    }
+    
     public ArrayList<Task> viewTasks()
     {
         ArrayList<Task> tasks = new ArrayList<>();

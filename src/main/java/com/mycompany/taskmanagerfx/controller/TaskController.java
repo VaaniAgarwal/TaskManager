@@ -7,7 +7,9 @@ package com.mycompany.taskmanagerfx.controller;
 import com.mycompany.taskmanagerfx.dao.TaskDAO;
 import com.mycompany.taskmanagerfx.pojo.Task;
 import java.util.ArrayList;
+import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.control.*;
 /**
  *
@@ -19,8 +21,11 @@ public class TaskController {
     private final TextField taskName;
     private final Button addbtn;
     private final Button delbtn;
+    private final Button editbtn;
+    private final Button updatebtn;
     private final ListView<Task> viewTask;
     private final VBox view;
+    private final HBox buttonview;
     private TaskDAO taskDAO;
     private ArrayList<Task> taskList;
     
@@ -37,8 +42,11 @@ public class TaskController {
         taskId.setPromptText("Enter Task ID");
         taskName=new TextField();
         taskName.setPromptText("Enter Task Name");
-        addbtn=new Button("Add a Task");
-        delbtn=new Button("Delete a Task");
+        addbtn=new Button("Add Task");
+        delbtn=new Button("Delete Task");
+        editbtn=new Button("Edit Task");
+        updatebtn = new Button("Update Task"); 
+        updatebtn.setDisable(true);
         viewTask=new ListView<>();
         taskList = new ArrayList<>();
         
@@ -49,9 +57,18 @@ public class TaskController {
         
         addbtn.setOnAction(e -> addTask());
         delbtn.setOnAction(e -> delTask());
+        editbtn.setOnAction(e -> editTask());
+        updatebtn.setOnAction(e -> updateTask());
         
         view=new VBox(10);
-        view.getChildren().addAll(label,taskId,taskName,addbtn,delbtn,viewTask);
+        view.setAlignment(Pos.CENTER);
+        view.getChildren().addAll(label,taskId,taskName,viewTask);
+        
+        buttonview=new HBox(10);
+        buttonview.getChildren().addAll(addbtn,delbtn,editbtn,updatebtn);
+        buttonview.setAlignment(Pos.CENTER);
+        
+        view.getChildren().add(buttonview);  
     }
     
     public VBox getView()
@@ -84,8 +101,45 @@ public class TaskController {
         }
     }
     
+    private void editTask()
+    {
+        Task selTask = viewTask.getSelectionModel().getSelectedItem();
+        if (selTask != null)
+        {
+            taskName.setText(selTask.getName());
+            taskId.setVisible(false);
+            addbtn.setDisable(true);
+            delbtn.setDisable(true);
+            editbtn.setDisable(true);
+            updatebtn.setDisable(false);
+        }
+    }
+    
+    public void updateTask()
+    {
+        Task selTask = viewTask.getSelectionModel().getSelectedItem();
+        if (selTask != null)
+        {
+            String newname = taskName.getText().trim();
+            if(!newname.isEmpty())
+            {
+                taskDAO.updateTasks(selTask.getId(),newname);
+                selTask.setName(newname);
+                update();
+                taskName.clear();
+                taskId.setVisible(true);
+                addbtn.setDisable(false);
+                delbtn.setDisable(false);
+                editbtn.setDisable(false);
+                updatebtn.setDisable(true);
+            }
+        }
+    }
+    
     private void update()
     {
+        taskList.clear();
+        taskList.addAll(taskDAO.viewTasks());
         viewTask.getItems().setAll(taskList);
     }
 }
