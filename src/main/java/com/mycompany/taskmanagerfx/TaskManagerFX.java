@@ -19,7 +19,7 @@ public class TaskManagerFX extends Application {
     {
         TaskController controller=new TaskController();
         VBox view=controller.getView();
-        Scene scene=new Scene(view,400,300);
+        Scene scene=new Scene(view,500,500);
         stage.setTitle("Task Manager");
         stage.setScene(scene);
         stage.show();
