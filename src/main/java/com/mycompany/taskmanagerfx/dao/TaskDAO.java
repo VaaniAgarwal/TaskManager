@@ -77,6 +77,20 @@ public class TaskDAO {
             
         }
     }
+    public void updateStatus(String id, boolean status)
+    {
+        try{
+            pstmt=con.prepareStatement("Update tasks set status = ? where taskid = ?");
+            pstmt.setBoolean(1, status);
+            pstmt.setString(2, id);
+            pstmt.executeUpdate();
+            System.out.println("Task Status Updated: "+id+" -> "+status);
+        }
+        catch(SQLException e)
+        {
+            
+        }
+    }
     
     public ArrayList<Task> viewTasks()
     {
@@ -85,7 +99,9 @@ public class TaskDAO {
             rs = stmt.executeQuery("Select * from tasks");
             while(rs.next())
             {
-                tasks.add(new Task(rs.getString("taskid"),rs.getString("taskname")));
+                Task task = new Task(rs.getString("taskid"),rs.getString("taskname"));
+                task.setStatus(rs.getBoolean("status"));
+                tasks.add(task);
             }
         }
         catch(SQLException ex)

@@ -10,10 +10,12 @@ package com.mycompany.taskmanagerfx.pojo;
  */
 public class Task {
     String id,name;
+    boolean status;
     public Task(String id,String name)
     {
         this.id=id;
         this.name=name;
+        this.status=false;
     }
     public String getId()
     {
@@ -30,6 +32,14 @@ public class Task {
     public void setName(String name)
     {
         this.name=name;
+    }
+    public boolean isCompleted()
+    {
+        return status;
+    }
+    public void setStatus(boolean status)
+    {
+        this.status=status;
     }
     @Override
     public String toString()

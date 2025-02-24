@@ -74,3 +74,7 @@
     -fx-background-color: rgba(255, 255, 255, 0.2);
     -fx-effect: dropshadow(three-pass-box, rgba(140, 82, 255, 0.5), 8, 0, 0, 5);
 }
+
+.check-box {
+    -fx-text-fill: white;
+}

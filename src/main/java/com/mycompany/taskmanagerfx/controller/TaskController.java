@@ -7,6 +7,7 @@ package com.mycompany.taskmanagerfx.controller;
 import com.mycompany.taskmanagerfx.dao.TaskDAO;
 import com.mycompany.taskmanagerfx.pojo.Task;
 import java.util.ArrayList;
+import java.util.List;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
@@ -23,6 +24,7 @@ public class TaskController {
     private final Button delbtn;
     private final Button editbtn;
     private final Button updatebtn;
+    private final TextField search;
     private final ListView<Task> viewTask;
     private final VBox view;
     private final HBox buttonview;
@@ -47,6 +49,8 @@ public class TaskController {
         editbtn=new Button("Edit Task");
         updatebtn = new Button("Update Task"); 
         updatebtn.setDisable(true);
+        search = new TextField();
+        search.setPromptText("Search Tasks");
         viewTask=new ListView<>();
         taskList = new ArrayList<>();
         
@@ -59,10 +63,13 @@ public class TaskController {
         delbtn.setOnAction(e -> delTask());
         editbtn.setOnAction(e -> editTask());
         updatebtn.setOnAction(e -> updateTask());
+        search.textProperty().addListener((obs, oldValue, newValue) -> { 
+            searchTasks(newValue);
+        });
         
         view=new VBox(10);
         view.setAlignment(Pos.CENTER);
-        view.getChildren().addAll(label,taskId,taskName,viewTask);
+        view.getChildren().addAll(label,search, taskId,taskName,viewTask);
         
         buttonview=new HBox(10);
         buttonview.getChildren().addAll(addbtn,delbtn,editbtn,updatebtn);
@@ -136,10 +143,49 @@ public class TaskController {
         }
     }
     
+    public void searchTasks(String s)
+    {
+        if(s.isEmpty())
+        {
+            viewTask.getItems().setAll(taskList);
+        }
+        else
+        {
+            List<Task> searchedTasks = taskList.stream()
+                    .filter(task -> task.getName().toLowerCase().contains(s.toLowerCase()) || 
+                            task.getId().toLowerCase().contains(s.toLowerCase())).toList();
+            viewTask.getItems().setAll(searchedTasks);
+        }
+    }
+    
     private void update()
     {
+        viewTask.getItems().clear();
         taskList.clear();
         taskList.addAll(taskDAO.viewTasks());
+        viewTask.setCellFactory(param -> new ListCell<Task>() {
+            private final CheckBox ch = new CheckBox();
+            
+            @Override
+            protected void updateItem(Task t, boolean empty)
+            {
+                super.updateItem(t, empty);
+                if(empty || t == null)
+                {
+                    setGraphic(null);
+                }
+                else
+                {
+                    ch.setText(t.getName());
+                    ch.setSelected(t.isCompleted());
+                    ch.setOnAction(e -> {
+                        t.setStatus(ch.isSelected());
+                        taskDAO.updateStatus(t.getId(), t.isCompleted());
+                    });
+                    setGraphic(ch);
+                }
+            }
+        });
         viewTask.getItems().setAll(taskList);
     }
 }
