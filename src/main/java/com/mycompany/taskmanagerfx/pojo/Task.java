@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.taskmanagerfx.pojo;
-
+import java.time.LocalDate;
 /**
  *
  * @author VAANI
@@ -11,11 +11,13 @@ package com.mycompany.taskmanagerfx.pojo;
 public class Task {
     String id,name;
     boolean status;
-    public Task(String id,String name)
+    LocalDate dueDate;
+    public Task(String id,String name,LocalDate dueDate)
     {
         this.id=id;
         this.name=name;
         this.status=false;
+        this.dueDate=dueDate;
     }
     public String getId()
     {
@@ -40,6 +42,14 @@ public class Task {
     public void setStatus(boolean status)
     {
         this.status=status;
+    }
+    public LocalDate getDueDate()
+    {
+        return dueDate;
+    }
+    public void setDueDate(LocalDate dueDate)
+    {
+        this.dueDate=dueDate;
     }
     @Override
     public String toString()

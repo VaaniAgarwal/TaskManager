@@ -6,6 +6,8 @@ package com.mycompany.taskmanagerfx.controller;
 
 import com.mycompany.taskmanagerfx.dao.TaskDAO;
 import com.mycompany.taskmanagerfx.pojo.Task;
+import javafx.scene.control.DatePicker;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Pos;
@@ -30,6 +32,7 @@ public class TaskController {
     private final HBox buttonview;
     private TaskDAO taskDAO;
     private ArrayList<Task> taskList;
+    private final DatePicker dueDate;
     
     public TaskController()
     {
@@ -44,6 +47,8 @@ public class TaskController {
         taskId.setPromptText("Enter Task ID");
         taskName=new TextField();
         taskName.setPromptText("Enter Task Name");
+        dueDate = new DatePicker();
+        dueDate.setPromptText("Set Due Date");
         addbtn=new Button("Add Task");
         delbtn=new Button("Delete Task");
         editbtn=new Button("Edit Task");
@@ -69,7 +74,7 @@ public class TaskController {
         
         view=new VBox(10);
         view.setAlignment(Pos.CENTER);
-        view.getChildren().addAll(label,search, taskId,taskName,viewTask);
+        view.getChildren().addAll(label,search, taskId,taskName,dueDate,viewTask);
         
         buttonview=new HBox(10);
         buttonview.getChildren().addAll(addbtn,delbtn,editbtn,updatebtn);
@@ -87,13 +92,15 @@ public class TaskController {
     {
         String id = taskId.getText().trim();
         String name = taskName.getText().trim();
-        if(!id.isEmpty() && !name.isEmpty())
+        LocalDate due = dueDate.getValue();
+        if(!id.isEmpty() && !name.isEmpty() && due != null )
         {
-            taskDAO.addTask(id,name);
+            taskDAO.addTask(id,name,due);
             taskList = taskDAO.viewTasks();
             update();
             taskId.clear();
             taskName.clear();
+            dueDate.setValue(null);
         }
     }
     
@@ -114,6 +121,7 @@ public class TaskController {
         if (selTask != null)
         {
             taskName.setText(selTask.getName());
+            dueDate.setValue(selTask.getDueDate());
             taskId.setVisible(false);
             addbtn.setDisable(true);
             delbtn.setDisable(true);
@@ -128,9 +136,10 @@ public class TaskController {
         if (selTask != null)
         {
             String newname = taskName.getText().trim();
+            LocalDate newDueDate = dueDate.getValue();
             if(!newname.isEmpty())
             {
-                taskDAO.updateTasks(selTask.getId(),newname);
+                taskDAO.updateTasks(selTask.getId(),newname,newDueDate);
                 selTask.setName(newname);
                 update();
                 taskName.clear();
@@ -176,7 +185,7 @@ public class TaskController {
                 }
                 else
                 {
-                    ch.setText(t.getName());
+                    ch.setText(t.getName()+" (Due: "+(t.getDueDate() != null ? t.getDueDate():"No Date") + ")");
                     ch.setSelected(t.isCompleted());
                     ch.setOnAction(e -> {
                         t.setStatus(ch.isSelected());

@@ -6,6 +6,7 @@ package com.mycompany.taskmanagerfx.dao;
 import com.mycompany.taskmanagerfx.pojo.Task;
 import java.sql.*;
 import java.util.*;
+import java.time.*;
 /**
  *
  * @author VAANI
@@ -36,14 +37,15 @@ public class TaskDAO {
         catch(SQLException e){            
         }
     }
-    public void addTask(String id,String name)
+    public void addTask(String id,String name,LocalDate dueDate)
     {
         try{
-            pstmt = con.prepareStatement("Insert into tasks (taskid, taskname) values (?,?)");
+            pstmt = con.prepareStatement("Insert into tasks (taskid, taskname, due_date) values (?,?,?)");
             pstmt.setString(1, id);
             pstmt.setString(2, name);
+            pstmt.setDate(3, (dueDate != null) ? java.sql.Date.valueOf(dueDate):null);
             pstmt.executeUpdate();
-            System.out.println("New Task Added: "+name);
+            System.out.println("New Task Added: "+name+"(Due: "+dueDate+")");
         }
         catch (SQLException ex){    
         }
@@ -61,12 +63,13 @@ public class TaskDAO {
         }
     }
     
-    public void updateTasks(String id, String newname)
+    public void updateTasks(String id, String newname, LocalDate dueDate)
     {
         try{
-            pstmt=con.prepareStatement("Update tasks set taskname = ? where taskid = ?");
+            pstmt=con.prepareStatement("Update tasks set taskname = ?, due_date = ? where taskid = ?");
             pstmt.setString(1, newname);
-            pstmt.setString(2, id);
+            pstmt.setDate(2, (dueDate != null) ? java.sql.Date.valueOf(dueDate):null);
+            pstmt.setString(3, id);
             int rowsupdated = pstmt.executeUpdate();
             if(rowsupdated > 0)
             {
@@ -99,7 +102,8 @@ public class TaskDAO {
             rs = stmt.executeQuery("Select * from tasks");
             while(rs.next())
             {
-                Task task = new Task(rs.getString("taskid"),rs.getString("taskname"));
+                LocalDate dueDate = rs.getDate("due_date") != null ? rs.getDate("due_date").toLocalDate():null;
+                Task task = new Task(rs.getString("taskid"),rs.getString("taskname"),dueDate);
                 task.setStatus(rs.getBoolean("status"));
                 tasks.add(task);
             }
