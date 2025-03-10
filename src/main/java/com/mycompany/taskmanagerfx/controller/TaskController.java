@@ -6,14 +6,16 @@ package com.mycompany.taskmanagerfx.controller;
 
 import com.mycompany.taskmanagerfx.dao.TaskDAO;
 import com.mycompany.taskmanagerfx.pojo.Task;
-import javafx.scene.control.DatePicker;
+import java.util.concurrent.*;
+import javafx.application.Platform;
+import javafx.scene.control.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.scene.control.*;
+import java.time.format.DateTimeFormatter;
 /**
  *
  * @author VAANI
@@ -33,6 +35,7 @@ public class TaskController {
     private TaskDAO taskDAO;
     private ArrayList<Task> taskList;
     private final DatePicker dueDate;
+    private final ScheduledExecutorService scheduler;
     
     public TaskController()
     {
@@ -58,6 +61,7 @@ public class TaskController {
         search.setPromptText("Search Tasks");
         viewTask=new ListView<>();
         taskList = new ArrayList<>();
+        scheduler = Executors.newSingleThreadScheduledExecutor();
         
         if(taskDAO != null){
             taskList.addAll(taskDAO.viewTasks());
@@ -81,6 +85,7 @@ public class TaskController {
         buttonview.setAlignment(Pos.CENTER);
         
         view.getChildren().add(buttonview);  
+        checkDueTasks();
     }
     
     public VBox getView()
@@ -185,7 +190,8 @@ public class TaskController {
                 }
                 else
                 {
-                    ch.setText(t.getName()+" (Due: "+(t.getDueDate() != null ? t.getDueDate():"No Date") + ")");
+                    DateTimeFormatter des = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy");
+                    ch.setText(t.getName()+" 🕒 "+(t.getDueDate() != null ? t.getDueDate().format(des):"No Date"));
                     ch.setSelected(t.isCompleted());
                     ch.setOnAction(e -> {
                         t.setStatus(ch.isSelected());
@@ -196,5 +202,36 @@ public class TaskController {
             }
         });
         viewTask.getItems().setAll(taskList);
+    }
+    
+    private void showAlert(String title, String msg)
+    {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText("Task Due Remainder!!");
+        alert.setContentText(msg);
+        DialogPane d = alert.getDialogPane();
+        d.getStylesheets().add(getClass().getResource("/styles/style.css").toExternalForm());
+        d.getStyleClass().add("custom-alert");
+        alert.showAndWait();
+    }
+    
+    private void checkDueTasks()
+    {
+        scheduler.scheduleAtFixedRate(() -> {
+            LocalDate today = LocalDate.now();
+            StringBuilder dueTasks = new StringBuilder();
+            for (Task task : taskList) 
+            {
+                if(task.getDueDate() != null && !task.isCompleted() && (task.getDueDate().isEqual(today) || task.getDueDate().isBefore(today)))
+                {
+                    dueTasks.append(task.getName()).append(" (Due: ").append(task.getDueDate()).append(")\n");
+                }
+            }
+            if(dueTasks.length() > 0)
+            {
+                Platform.runLater(() -> showAlert("Task Remainder!","\n" + dueTasks));
+            }
+        },0,1,TimeUnit.MINUTES);
     }
 }
