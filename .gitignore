@@ -1,1 +1,7 @@
+# Ignore NetBeans and build files
+target/
+site/
+nb-configuration.xml
+nbactions.xml
+OneDrive/
 
